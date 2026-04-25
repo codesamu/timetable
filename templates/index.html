@@ -1,21 +1,66 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Worker Timetable</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+html{
+-webkit-text-size-adjust:100%;
+}
+
+input[type="text"]{
+font-size:16px; /* prevents iOS zoom */
+}
+
+.table-scroll{
+overflow-x:auto;
+overflow-y:hidden;
+-webkit-overflow-scrolling:touch;
+touch-action:pan-x;
+}
+
+@media (max-width:768px){
+
+.worker-table{
+min-width:720px;
+}
+
+.mobile-sticky-day{
+width:88px;
+min-width:88px;
+}
+
+.mobile-sticky-date{
+left:88px;
+width:70px;
+min-width:70px;
+}
+
+.worker-input{
+min-width:110px;
+}
+
+}
+</style>
 </head>
 
+
 <body class="bg-slate-100 text-slate-900">
-<main class="mx-auto max-w-7xl p-4 md:p-8">
+
+<main class="mx-auto max-w-7xl p-3 md:p-8">
 
 <header class="mb-5">
-<div class="flex items-start justify-between gap-4">
+<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+
 <div>
-<h1 class="text-2xl font-bold tracking-tight">
+<h1 class="text-xl md:text-2xl font-bold tracking-tight">
 Worker Timetable
 </h1>
+
 <p class="mt-1 text-sm text-slate-600">
 Rolling four-week view. Older weeks are archived below automatically.
 </p>
@@ -24,21 +69,24 @@ Rolling four-week view. Older weeks are archived below automatically.
 <form method="post" action="{{ url_for('logout') }}">
 <button
 type="submit"
-class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-50"
 >
 Log out
 </button>
 </form>
+
 </div>
 </header>
 
 
+
 <section class="mb-5">
-<div class="inline-flex rounded-lg border border-slate-300 bg-white p-1 shadow-sm">
+<div class="flex flex-wrap gap-2 rounded-xl border border-slate-300 bg-white p-2 shadow-sm">
+
 <button
 type="button"
 data-tab-button="timetable"
-class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-medium text-white"
+class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
 >
 Timetable
 </button>
@@ -46,7 +94,7 @@ Timetable
 <button
 type="button"
 data-tab-button="workers"
-class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+class="rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-100"
 >
 Worker management
 </button>
@@ -54,44 +102,50 @@ Worker management
 <button
 type="button"
 data-tab-button="archive"
-class="rounded-md px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+class="rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-100"
 >
 Archived weeks
 </button>
+
 </div>
 </section>
 
 
-<!-- NEW SHIFT LEGEND -->
+
 <section class="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-<div class="flex flex-wrap items-center gap-3 text-sm">
-<span class="font-semibold text-slate-800">Shortcuts:</span>
-
-<span class="rounded-md bg-slate-100 px-2 py-1">
-<strong>d1</strong> = 8:00-19:30
+<div class="flex flex-wrap gap-2 text-xs md:text-sm">
+<span class="font-semibold">
+Shortcuts:
 </span>
 
-<span class="rounded-md bg-slate-100 px-2 py-1">
-<strong>d2</strong> = 7:00-15:00
+<span class="rounded bg-slate-100 px-2 py-1">
+d1 = 8:00-19:30
 </span>
 
-<span class="rounded-md bg-slate-100 px-2 py-1">
-<strong>d3</strong> = 6:00-14:00
+<span class="rounded bg-slate-100 px-2 py-1">
+d2 = 7:00-15:00
 </span>
 
-<span class="rounded-md bg-slate-100 px-2 py-1">
-<strong>n1</strong> = 19:30-8:00
+<span class="rounded bg-slate-100 px-2 py-1">
+d3 = 6:00-14:00
 </span>
 
-<span class="rounded-md bg-slate-100 px-2 py-1">
-<strong>off</strong> = OFF
+<span class="rounded bg-slate-100 px-2 py-1">
+n1 = 19:30-8:00
 </span>
+
+<span class="rounded bg-slate-100 px-2 py-1">
+off = OFF
+</span>
+
 </div>
 
 <p class="mt-2 text-xs text-slate-500">
-Type a shortcut then press Space, Enter, or leave the cell.
+Type shortcut then press Space, Enter, or leave the cell.
 </p>
 </section>
+
+
 
 
 <section data-tab-panel="timetable" class="grid gap-5">
@@ -100,63 +154,77 @@ Type a shortcut then press Space, Enter, or leave the cell.
 <article class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
 <div class="border-b border-slate-200 bg-slate-50 px-4 py-3">
-<h2 class="text-base font-semibold text-slate-800">
+<h2 class="font-semibold text-slate-800">
 {{ week.label }}
 </h2>
 </div>
 
-<div class="overflow-auto">
+<div class="md:hidden px-4 py-2 text-xs text-slate-500 bg-slate-50 border-b">
+← Swipe sideways to see all workers →
+</div>
 
-<table class="w-full min-w-[920px] border-collapse">
+<div class="table-scroll">
+
+<table class="worker-table w-full border-collapse">
 
 <thead>
 <tr>
-<th class="sticky left-0 z-20 w-[160px] min-w-[160px] border-b border-r border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold">
+
+<th class="sticky top-0 left-0 z-30 mobile-sticky-day md:w-[150px] md:min-w-[150px]
+bg-slate-50 border-b border-r border-slate-200 px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold">
 Day
 </th>
 
-<th class="sticky left-[160px] z-20 w-[130px] min-w-[130px] border-b border-r border-slate-200 bg-slate-50 px-4 py-3 text-left text-sm font-semibold">
+<th class="sticky top-0 z-30 mobile-sticky-date md:left-[150px]
+md:w-[120px] md:min-w-[120px]
+bg-slate-50 border-b border-r border-slate-200 px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold">
 Date
 </th>
 
 {% for worker,color in workers_with_colors %}
 <th
-class="border-b border-slate-200 px-4 py-3 text-left text-sm font-semibold"
+class="sticky top-0 z-20 min-w-[110px] md:min-w-[150px]
+border-b border-slate-200 px-2 md:px-4 py-3 text-left text-xs md:text-sm font-semibold"
 style="background-color: {{ color }}22;"
 >
-<span class="inline-flex items-center gap-2">
+<div class="flex items-center gap-2">
 <span
-class="worker-color-dot h-2.5 w-2.5 rounded-full"
-data-color="{{ color }}"
-style="background-color: {{ color }};"
+class="h-2.5 w-2.5 rounded-full"
+style="background:{{ color }}"
 ></span>
 
-<span class="worker-color-name" data-color="{{ color }}" style="color: {{ color }};">
+<span style="color:{{ color }}">
 {{ worker }}
 </span>
-</span>
+</div>
 </th>
 {% endfor %}
 
 </tr>
 </thead>
 
+
+
 <tbody>
+
 {% for row in week.rows %}
 <tr class="odd:bg-white even:bg-slate-50/50">
 
-<td class="sticky left-0 z-10 border-r border-t border-slate-200 bg-inherit px-4 py-2 text-sm font-medium">
+<td class="sticky left-0 z-20 mobile-sticky-day bg-inherit
+border-r border-t border-slate-200 px-2 md:px-4 py-2 text-xs md:text-sm font-medium">
 {{ row.day_name }}
 </td>
 
-<td class="sticky left-[160px] z-10 border-r border-t border-slate-200 bg-inherit px-4 py-2 text-sm text-slate-700">
+<td class="sticky z-20 mobile-sticky-date bg-inherit
+border-r border-t border-slate-200 px-2 md:px-4 py-2 text-xs md:text-sm">
 {{ row.date_label }}
 </td>
 
+
 {% for worker,color in workers_with_colors %}
 <td
-class="border-t border-slate-200 p-0"
-style="background-color: {{ color }}22;"
+class="border-t border-slate-200 p-0 worker-input"
+style="background-color:{{ color }}22;"
 >
 <input
 type="text"
@@ -165,7 +233,7 @@ value="{{ row['values'].get((loop.index0|string), '') }}"
 data-date="{{ row.iso_date }}"
 data-worker-index="{{ loop.index0 }}"
 aria-label="{{ week.label }} {{ row.day_name }} {{ worker }}"
-class="w-full border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder:text-slate-400 focus:bg-white/70"
+class="w-full border-0 bg-transparent px-2 md:px-3 py-3 md:py-2 text-sm outline-none placeholder:text-slate-400 focus:bg-white/70"
 />
 </td>
 {% endfor %}
@@ -183,124 +251,167 @@ class="w-full border-0 bg-transparent px-3 py-2 text-sm outline-none placeholder
 </section>
 
 
-<section data-tab-panel="workers"
-class="hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 
-<h2 class="text-base font-semibold text-slate-800">
+
+
+<section
+data-tab-panel="workers"
+class="hidden rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+>
+
+<h2 class="font-semibold">
 Manage workers
 </h2>
 
 <p class="mt-1 text-sm text-slate-600">
-Rename workers, add new ones, or remove unused entries.
+Rename workers, add new ones, or remove entries.
 </p>
 
-<div class="mt-3 grid gap-2">
-{% for worker,color in workers_with_colors %}
-<div class="flex flex-wrap items-center gap-2">
 
-<form method="post"
+<div class="mt-4 grid gap-4">
+
+{% for worker,color in workers_with_colors %}
+<div class="rounded-xl border border-slate-200 p-3">
+
+<div class="flex flex-col md:flex-row gap-3">
+
+<form
+method="post"
 action="{{ url_for('rename_worker') }}"
-class="flex flex-1 items-center gap-2">
+class="flex-1 flex flex-col sm:flex-row gap-2"
+>
 <input type="hidden" name="worker_index" value="{{ loop.index0 }}">
 
 <input
 name="name"
 value="{{ worker }}"
 required
-class="w-full min-w-[220px] rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
->
+class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+/>
 
 <button
-class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
-type="submit">
+class="rounded-lg border px-4 py-2 text-sm bg-white"
+type="submit"
+>
 Save
 </button>
+
 </form>
 
-<form method="post"
+
+<form
+method="post"
 action="{{ url_for('update_worker_color') }}"
-class="flex items-center gap-2">
+class="flex items-center gap-2"
+>
 <input type="hidden" name="worker_index" value="{{ loop.index0 }}">
 
 <input
 type="color"
 name="color"
 value="{{ color }}"
-class="h-9 w-12 rounded border border-slate-300"
->
+class="h-10 w-14 rounded border"
+/>
 
 <button
-class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm"
-type="submit">
+class="rounded-lg border bg-white px-4 py-2 text-sm"
+type="submit"
+>
 Color
 </button>
+
 </form>
+
 
 <form method="post" action="{{ url_for('delete_worker') }}">
 <input type="hidden" name="worker_index" value="{{ loop.index0 }}">
 <button
-class="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-sm text-red-700"
-type="submit">
+class="rounded-lg bg-red-50 border border-red-200 px-4 py-2 text-sm text-red-700"
+type="submit"
+>
 Delete
 </button>
 </form>
 
 </div>
-{% endfor %}
 </div>
+{% endfor %}
+
+</div>
+
+
 
 <form
 method="post"
 action="{{ url_for('add_worker') }}"
-class="mt-4 flex flex-wrap items-center gap-2">
+class="mt-6 flex flex-col sm:flex-row gap-2"
+>
+
 <input
 name="name"
 required
 placeholder="New worker name"
-class="w-full max-w-xs rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
->
+class="flex-1 max-w-md rounded-lg border border-slate-300 px-3 py-2 text-sm"
+/>
 
 <button
 type="submit"
-class="rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-medium text-white">
+class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
+>
 Add worker
 </button>
+
 </form>
 
 </section>
 
 
-<section data-tab-panel="archive"
-class="hidden mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 
-<h2 class="text-base font-semibold text-slate-800">
+
+
+
+<section
+data-tab-panel="archive"
+class="hidden mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+>
+
+<h2 class="font-semibold">
 Archived weeks
 </h2>
 
 {% if archive_weeks %}
+
 <div class="mt-4 grid gap-4">
 
 {% for week in archive_weeks %}
-<details class="overflow-hidden rounded-lg border border-slate-200">
-<summary class="cursor-pointer bg-slate-50 px-4 py-2 text-sm font-medium">
+<details class="rounded-xl overflow-hidden border border-slate-200">
+
+<summary class="cursor-pointer bg-slate-50 px-4 py-3 text-sm font-medium">
 {{ week.label }}
 </summary>
 
-<div class="overflow-auto">
-<table class="w-full min-w-[920px] border-collapse">
+<div class="md:hidden px-4 py-2 text-xs text-slate-500 border-b">
+← Swipe sideways →
+</div>
+
+<div class="table-scroll">
+
+<table class="worker-table w-full border-collapse">
 
 <thead>
 <tr>
-<th class="border-b border-r border-slate-200 px-4 py-3 text-left text-sm">
+
+<th class="border-b border-r px-3 py-3 text-left text-sm">
 Day
 </th>
-<th class="border-b border-r border-slate-200 px-4 py-3 text-left text-sm">
+
+<th class="border-b border-r px-3 py-3 text-left text-sm">
 Date
 </th>
 
 {% for worker in week.worker_names %}
 <th
-class="border-b border-slate-200 px-4 py-3 text-left text-sm"
+class="border-b px-3 py-3 text-left text-sm min-w-[120px]"
 style="background-color: {{ week.worker_colors[loop.index0] }}22;"
 >
 {{ worker }}
@@ -311,43 +422,53 @@ style="background-color: {{ week.worker_colors[loop.index0] }}22;"
 </thead>
 
 <tbody>
+
 {% for row in week.rows %}
 <tr class="odd:bg-white even:bg-slate-50/50">
-<td class="border-r border-t border-slate-200 px-4 py-2 text-sm">
+
+<td class="border-r border-t px-3 py-2 text-sm">
 {{ row.day_name }}
 </td>
-<td class="border-r border-t border-slate-200 px-4 py-2 text-sm">
+
+<td class="border-r border-t px-3 py-2 text-sm">
 {{ row.date_label }}
 </td>
 
 {% for worker in week.worker_names %}
 <td
-class="border-t border-slate-200 px-3 py-2 text-sm"
-style="background-color: {{ week.worker_colors[loop.index0] }}22;">
+class="border-t px-3 py-2 text-sm"
+style="background-color:{{ week.worker_colors[loop.index0] }}22;"
+>
 {{ row['values'].get((loop.index0|string), '') }}
 </td>
 {% endfor %}
 
 </tr>
 {% endfor %}
-</tbody>
 
+</tbody>
 </table>
+
 </div>
 </details>
 {% endfor %}
 
 </div>
+
 {% else %}
-<p class="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
+
+<p class="mt-4 rounded-lg border bg-slate-50 px-3 py-2 text-sm text-slate-600">
 No archived weeks yet.
 </p>
+
 {% endif %}
 
 </section>
 
+
 </main>
 
 <script src="{{ url_for('static', filename='app.js') }}"></script>
+
 </body>
 </html>
